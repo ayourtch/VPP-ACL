@@ -15,6 +15,8 @@ DPDKConfig {
 	-- only one of the following examples can be used
 
 	--pciWhitelist = {"LC1P0",      "LC1P1"},
+        -- 81.1 does not come up...
+	-- pciWhitelist = {"81:00.0", "81:00.1"},
 	pciWhitelist = {"84:00.0", "84:00.1"},
 	
 	-- arbitrary DPDK command line options
@@ -22,7 +24,8 @@ DPDKConfig {
 	-- cf. http://dpdk.org/doc/guides/prog_guide/multi_proc_support.html#running-multiple-independent-dpdk-applications
 	cli = {
 		"--file-prefix", "m1",
-		"--socket-mem", "4096,4096"
+		-- "--socket-mem", "4096,4096"
+		"--socket-mem", "512,512"
 	}
 
 }

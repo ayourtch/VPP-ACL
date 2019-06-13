@@ -1,6 +1,13 @@
 #!/bin/bash
 
 VPPFIX="vpp3653"
+sudo modprobe uio_pci_generic
+# sudo dpdk-devbind -b uio_pci_generic 0000:81:00.0 0000:81:00.1 0000:03:00.0 0000:03:00.1
+sudo dpdk-devbind -b uio_pci_generic 0000:84:00.0 0000:84:00.1 0000:02:00.0 0000:02:00.1
+
+
+# args: 1k_1 acl1
+
 dir=$1
 seed=$2
 
@@ -16,6 +23,9 @@ echo "______$dir\__$seed____" >> $EXP_RES/results_$dts/Partition_$dts/$seed\_par
 
 # ayourtch
 # for acl_rules in $RULESET/$dir/$seed*.rules;
+
+echo rules are in $RULESET/$dir/${seed}_seed_1.rules 
+
 for acl_rules in $RULESET/$dir/${seed}_seed_1.rules;
 do
 rfilename="${acl_rules##/*/}"
@@ -33,38 +43,45 @@ echo "VPP START DEFAULT: $VPPFIX"
 sh $EXP_VPP/conf-acl.sh $VPPFIX $acl_rules
 sleep 2
 
+
 sh $EXP_VPP/conf-xc.sh $VPPFIX
+# sh $EXP_VPP/conf-bridge.sh $VPPFIX
 
 cd $EXP_VPP/elog_parser
 pwd
 
 echo "ELOG clean"
-sh elog_clean.sh
+# sh elog_clean.sh
 
 mkdir -p $EXP_RES/results_$dts/$classe_exp\_$dir
 echo "\n" > $EXP_RES/results_$dts/$classe_exp\_$dir/MG_$name_exp.out
 
-# echo "Perf record start"
-# sudo perf record -C 0 -o /tmp/ayourtch_vpp_perf_record &
+echo "Perf record start"
+sudo perf record -C 1 -o /tmp/ayourtch_vpp_perf_record &
+
+echo VPP trace start
+sudo -E $BINS/vppctl -s /tmp/cli.sock trace add dpdk-input 50
 
 echo "MoonGen"
 echo "sudo $MOONGEN_PATH/build/MoonGen $MGSCR/tr_gen_timer.lua --dpdk-config=$CONFIG_DIR/dpdk-conf.lua 1 0 $RULESET/trace_shot/$dir/$tfilename > tmp.out"
+# echo PRESS ENTER
+# read ASDASD
 sudo $MOONGEN_PATH/build/MoonGen $MGSCR/tr_gen_timer.lua --dpdk-config=$CONFIG_DIR/dpdk-conf.lua 1 0 $RULESET/trace_shot/$dir/$tfilename > tmp.out
 
-# echo "Stop perf record"
-# sudo killall perf
+echo "Stop perf record"
+sudo killall perf
 
 cat tmp.out
 cat tmp.out >> $EXP_RES/results_$dts/$classe_exp\_$dir/MG_$name_exp.out
 rm tmp.out
 
 echo "ELOG dump"
-sh elog_clk.sh
+# sh elog_clk.sh
 
-sed -n 10,20p clk_output_elog
-cat clk_output_elog > $EXP_RES/results_$dts/$classe_exp\_$dir/Elog_$name_exp.out
-cat clk_output_elog >> $EXP_RES/results_$dts/$classe_exp\_$dir/Elog_$seed.out
-rm clk_output_elog 
+# sed -n 10,20p clk_output_elog
+# cat clk_output_elog > $EXP_RES/results_$dts/$classe_exp\_$dir/Elog_$name_exp.out
+# cat clk_output_elog >> $EXP_RES/results_$dts/$classe_exp\_$dir/Elog_$seed.out
+# rm clk_output_elog 
 #mv clk_output_elog $EXP_RES/results/$classe_exp/Elog_$name_exp.out
 
 
@@ -88,6 +105,7 @@ cat tmp.out >> $EXP_RES/results_$dts/Partition_$dts/$seed\_collisions.out
 rm tmp.out
 
 
+sudo -E $BINS/vppctl -s /tmp/cli.sock show acl-plugin acl | tee /tmp/acl-data
 
 echo "sudo -E $BINS/vppctl -s /tmp/cli.sock acl-plugin show d-partition sw_if_index 2 input 0 > tmp.out"
 sudo -E $BINS/vppctl -s /tmp/cli.sock acl-plugin show d-partition lc_index 0 > tmp.out
@@ -95,6 +113,20 @@ sudo -E $BINS/vppctl -s /tmp/cli.sock acl-plugin show d-partition lc_index 0 > t
 cat tmp.out
 cat tmp.out >> $EXP_RES/results_$dts/Partition_$dts/$seed\_d-parti.out
 rm tmp.out
+
+# sudo -E $BINS/vppctl -s /tmp/cli.sock show acl-plugin tables applied >> tmp.out
+sudo -E $BINS/vppctl -s /tmp/cli.sock show acl-plugin sess >> /tmp/show-acl-sess.out
+sudo -E $BINS/vppctl -s /tmp/cli.sock show trace >> /tmp/show-trace.txt
+# sudo -E $BINS/vppctl -s /tmp/cli.sock show trace >> tmp.out
+touch tmp.out
+cat tmp.out
+cat tmp.out >> $EXP_RES/results_$dts/Partition_$dts/$seed\_applied-tables.out
+rm tmp.out
+
+sudo -E $BINS/vppctl -s /tmp/cli.sock show run >/tmp/show-run.txt
+sudo -E $BINS/vppctl -s /tmp/cli.sock "show event-logger" >/tmp/show-event-logger.txt
+sudo -E $BINS/vppctl -s /tmp/cli.sock "show errors" >/tmp/show-errors.txt
+sudo -E $BINS/vppctl -s /tmp/cli.sock show interface features TenGigabitEthernet2/0/1 >/tmp/show-int-feature.txt
 
 cd -
 pwd
@@ -109,5 +141,6 @@ sudo rm /tmp/cli.sock
 
 
 #show the results
-(cd $EXP_RES/results_$dts/; pwd; find . -name 'MG_*seed_1.out'  -exec grep -H RX: {} \;) | sort
+(cd $EXP_RES/results_$dts/; pwd; find . -name 'MG_*seed_1.out'  -exec grep -H RX: {} \;) | sort  | grep -v --color=never $dir
+(cd $EXP_RES/results_$dts/; pwd; find . -name 'MG_*seed_1.out'  -exec grep -H RX: {} \;) | sort  | grep --color=always $dir
 

@@ -8,25 +8,15 @@ echo 1 | sudo tee  /sys/devices/system/cpu/intel_pstate/no_turbo
 sleep 2
 
 #Cleaning?
-echo 60 | sudo tee /sys/kernel/mm/hugepages/hugepages-1048576kB/nr_hugepages
+#echo 60 | sudo tee /sys/kernel/mm/hugepages/hugepages-1048576kB/nr_hugepages
 sudo rm /dev/hugepages/*
 
 sleep 2
 #================================================================
 
-#sh xc-throughput.sh 
-
-:'
-for class in acl1
-do
-for dirs in 2k_1 4k_1 8k_1 1k_1
-do
-	echo "================$dirs============="
-	sh acl-throughput.sh $dirs $class
-done
-done
-'
-
+#this kind experiment will generate raw data about clock cycle spent to classify packets in fa_node.c
+#it requires VALE_ELOG
+#create in $EXP_RES directory a new directory called $seed_$size/ELOG_output 
 
 #:'
 for class in acl1 #acl2 acl3 acl4 acl5
@@ -41,6 +31,9 @@ done
 #'
 
 
+#this kind experiment will generate raw data about ACl-ACE index matched for each packet (plus how many ht_accesses it uses) 
+#in public_inlines.h
+#it requires VALE_ELOG_ACL
 
 :'
 for class in acl1 acl2 acl3 acl4 acl5
@@ -56,6 +49,9 @@ mv $EXP_RES/results_$(date '+%d-%m') /Index $EXP_RES/results_$(date '+%d-%m')/In
 
 #vpp_compile.sh
 
+#this kind experiment will generate MoonGen output raw data in which are recorded all RX-TX speed
+#it requires NO ELOG variables activated
+#create in $EXP_RES directory a new directory called $seed_$size/MG_output 
 :'
 for class in acl1  acl2 acl3 acl4 acl5
 do
@@ -67,6 +63,10 @@ done
 echo "=========== $(date '+%d-%m_%H-%M') ============"
 done
 '
+
+#this kind experiment will generate debug raw data in which are reported #mask_type created
+#number of max collisions and how many entries in each mask_type
+#create in $EXP_RES directory a new directory called Partition in which there are file from the vppctl functions
 
 :'
 for class in acl1 #acl2 acl3 acl4 acl5

@@ -15,4 +15,5 @@ fi
 PREFIX=`cat $STARTUP_CONF | grep prefix | awk '{print $2}' | xargs echo -n`
 
 echo "STARTING VPP WITH (name=$PREFIX)."
-sudo $BINS/vpp `cat $STARTUP_CONF` plugin_path $PLUGS 
+# sudo $BINS/vpp `cat $STARTUP_CONF` plugin_path $PLUGS 
+sudo $BINS/vpp `cat $STARTUP_CONF`

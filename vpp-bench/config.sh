@@ -1,5 +1,7 @@
 #!/bin/bash
 
+unset TERM 
+
 # Linecards
 export LC0P0=0000:0b:00.0
 export LC0P1=0000:0b:00.1
@@ -47,32 +49,34 @@ export DEFAULTIP="99.99.99.99"
 export DEFAULTIP6="2211:2::ffff"
 
 # VPP
-export VPP_ROOT=vpp1704/vpp
+export VPP_ROOT=$HOME/vpp
 export VPP_PLUGIN_PATH=$VPP_ROOT/build-root/install-vpp-native/vpp/lib64/vpp_api_test_plugins
 
 # DPDK
-export RTE_SDK=/usr/local/src/dpdk-17.02
-export RTE_PKTGEN=/usr/local/src/pktgen-dpdk-pktgen-3.1.2
+export RTE_SDK=$VPP_ROOT/dpdk-17.02
 export RTE_TARGET=x86_64-native-linuxapp-gcc
 # MOONGEN
-export MOONGEN_PATH=/usr/local/src/MoonGen/
+export MOONGEN_PATH=$HOME/moongen/valerio/MoonGen
 
 # Config
-export CONFIG_DIR=/home/valerio/vpp-bench/scripts
+export CONFIG_DIR=$HOME/VPP-ACL/vpp-bench/
 #export PATH=$PATH:$CONFIG_DIR:$RTE_SDK/usertools
 export PATH=$PATH:$CONFIG_DIR:$RTE_SDK/usertools:$VPP_ROOT/build-root/build-tool-native/tools
 export C_INCLUDE_PATH=$C_INCLUDE_PATH:$VPP_ROOT/build-root/install-vpp-native/vpp/include
-export STARTUP_CONF=$CONFIG_DIR/startup.conf
+export STARTUP_CONF=$CONFIG_DIR/startup2.conf
 export DPDK_CONF=$CONFIG_DIR/tgdpdk.conf
 export BINS="$VPP_ROOT/build-root/install-vpp-native/vpp/bin"
-export PLUGS="$VPP_ROOT/build-root/install-vpp-native/vpp/lib64/vpp_plugins"
+# old location
+# export PLUGS="$VPP_ROOT/build-root/install-vpp-native/vpp/lib64/vpp_plugins"
+
+# export PLUGS="$VPP_ROOT/build-root/install-vpp-native/vpp/lib/vpp_plugins/"
 export SFLAG="env PATH=$PATH:$BINS"
 
 ##Added by Valerio, Experiment
-export EXP-VPP="VPP-ACL/Experiment"
-export EXP-RES="VPP-ACL/RAW-DATA"
-export RULESET="VPP-ACL/Ruleset"
-export MGSCR="VPP-ACL/MoonGen_parser"
+export EXP_VPP="$HOME/VPP-ACL/Experiment/Release"
+export EXP_RES="$HOME/VPP-ACL/RAW-DATA"
+export RULESET="$HOME/VPP-ACL/Ruleset"
+export MGSCR="$HOME/VPP-ACL/MoonGen_parser"
 
 # Aliases
 #alias force-update-conf="svn export https://github.com/theleos88/vpp-bench/trunk/scripts --force $CONFIG_DIR && source $CONFIG_DIR/config.sh"
